@@ -426,46 +426,74 @@ TSSLSocketMatchNameTest_LDADD = \
 #
 # Common thrift code generation rules
 #
-# files from /test
+# Serialize all code generation that writes to gen-cpp/ to avoid
+# parallel thrift compiler instances racing on the same output directory.
 #
 
-gen-cpp/AnnotationTest_constants.cpp gen-cpp/AnnotationTest_constants.h gen-cpp/AnnotationTest_types.cpp gen-cpp/AnnotationTest_types.h: $(top_srcdir)/test/AnnotationTest.thrift
-	$(THRIFT) --gen cpp $<
+GENCPP_STAMP = gen-cpp/.stamp
 
-gen-cpp/DebugProtoTest_types.cpp gen-cpp/DebugProtoTest_types.h gen-cpp/EmptyService.cpp gen-cpp/EmptyService.h: $(top_srcdir)/test/DebugProtoTest.thrift
-	$(THRIFT) --gen cpp $<
+$(GENCPP_STAMP): $(top_srcdir)/test/AnnotationTest.thrift \
+		$(top_srcdir)/test/DebugProtoTest.thrift \
+		$(top_srcdir)/test/DoubleConstantsTest.thrift \
+		$(top_srcdir)/test/EnumTest.thrift \
+		$(top_srcdir)/test/TypedefTest.thrift \
+		$(top_srcdir)/test/OptionalRequiredTest.thrift \
+		$(top_srcdir)/test/Recursive.thrift \
+		$(top_srcdir)/test/StressTest.thrift \
+		$(top_srcdir)/test/ThriftTest.thrift \
+		OneWayTest.thrift \
+		Thrift5272.thrift \
+		processor/proc.thrift
+	$(MKDIR_P) gen-cpp
+	$(THRIFT) --gen cpp $(top_srcdir)/test/AnnotationTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/DebugProtoTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/DoubleConstantsTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/EnumTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/TypedefTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/OptionalRequiredTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/Recursive.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/StressTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/ThriftTest.thrift
+	$(THRIFT) --gen cpp OneWayTest.thrift
+	$(THRIFT) --gen cpp Thrift5272.thrift
+	$(THRIFT) --gen cpp:templates,cob_style processor/proc.thrift
+	@touch $@
 
-gen-cpp/DoubleConstantsTest_constants.cpp gen-cpp/DoubleConstantsTest_constants.h: $(top_srcdir)/test/DoubleConstantsTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/AnnotationTest_constants.cpp gen-cpp/AnnotationTest_constants.h gen-cpp/AnnotationTest_types.cpp gen-cpp/AnnotationTest_types.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/EnumTest_types.cpp gen-cpp/EnumTest_types.h: $(top_srcdir)/test/EnumTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/DebugProtoTest_types.cpp gen-cpp/DebugProtoTest_types.h gen-cpp/EmptyService.cpp gen-cpp/EmptyService.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/TypedefTest_types.cpp gen-cpp/TypedefTest_types.h: $(top_srcdir)/test/TypedefTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/DoubleConstantsTest_constants.cpp gen-cpp/DoubleConstantsTest_constants.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/OptionalRequiredTest_types.cpp gen-cpp/OptionalRequiredTest_types.h: $(top_srcdir)/test/OptionalRequiredTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/EnumTest_types.cpp gen-cpp/EnumTest_types.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/Recursive_types.cpp gen-cpp/Recursive_types.h: $(top_srcdir)/test/Recursive.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/TypedefTest_types.cpp gen-cpp/TypedefTest_types.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/Service.cpp gen-cpp/StressTest_types.cpp: $(top_srcdir)/test/StressTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/OptionalRequiredTest_types.cpp gen-cpp/OptionalRequiredTest_types.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/SecondService.cpp gen-cpp/ThriftTest_constants.cpp gen-cpp/ThriftTest.cpp gen-cpp/ThriftTest_types.cpp gen-cpp/ThriftTest_types.h: $(top_srcdir)/test/ThriftTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/Recursive_types.cpp gen-cpp/Recursive_types.h: $(GENCPP_STAMP)
+	@:
 
-# files from /lib/cpp/test
+gen-cpp/Service.cpp gen-cpp/StressTest_types.cpp: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/OneWayService.cpp gen-cpp/OneWayTest_types.h gen-cpp/OneWayService.h: OneWayTest.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/SecondService.cpp gen-cpp/ThriftTest_constants.cpp gen-cpp/ThriftTest.cpp gen-cpp/ThriftTest_types.cpp gen-cpp/ThriftTest_types.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/Thrift5272_types.cpp gen-cpp/Thrift5272_types.h: Thrift5272.thrift
-	$(THRIFT) --gen cpp $<
+gen-cpp/OneWayService.cpp gen-cpp/OneWayTest_types.h gen-cpp/OneWayService.h: $(GENCPP_STAMP)
+	@:
 
-gen-cpp/ChildService.cpp gen-cpp/ChildService.h gen-cpp/ParentService.cpp gen-cpp/ParentService.h gen-cpp/proc_types.cpp gen-cpp/proc_types.h: processor/proc.thrift
-	$(THRIFT) --gen cpp:templates,cob_style $<
+gen-cpp/Thrift5272_types.cpp gen-cpp/Thrift5272_types.h: $(GENCPP_STAMP)
+	@:
+
+gen-cpp/ChildService.cpp gen-cpp/ChildService.h gen-cpp/ParentService.cpp gen-cpp/ParentService.h gen-cpp/proc_types.cpp gen-cpp/proc_types.h: $(GENCPP_STAMP)
+	@:
 
 AM_CPPFLAGS = $(BOOST_CPPFLAGS) -I$(top_srcdir)/lib/cpp/src -I$(top_srcdir)/lib/cpp/src/thrift -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I.
 AM_LDFLAGS = $(BOOST_LDFLAGS)

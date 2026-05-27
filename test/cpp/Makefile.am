@@ -213,8 +213,30 @@ PrivateOptionalTemplateStreamOpTest_LDADD = \
 #
 # Common thrift code generation rules
 #
-gen-cpp/ThriftTest.cpp gen-cpp/ThriftTest_types.cpp gen-cpp/ThriftTest_constants.cpp gen-cpp/SecondService.cpp gen-cpp/SecondService.h gen-cpp/SecondService.tcc: $(top_srcdir)/test/ThriftTest.thrift $(THRIFT)
-	$(THRIFT) --gen cpp:templates,cob_style -r $<
+# Serialize code generation into gen-cpp/ to avoid parallel thrift
+# compiler instances racing on the same output directory.
+#
+
+GENCPP_STAMP = gen-cpp/.stamp
+
+$(GENCPP_STAMP): $(top_srcdir)/test/ThriftTest.thrift \
+		$(top_srcdir)/test/StressTest.thrift \
+		$(top_srcdir)/test/SpecificName.thrift \
+		$(THRIFT)
+	$(MKDIR_P) gen-cpp
+	$(THRIFT) --gen cpp:templates,cob_style -r $(top_srcdir)/test/ThriftTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/StressTest.thrift
+	$(THRIFT) --gen cpp $(top_srcdir)/test/SpecificName.thrift
+	@touch $@
+
+gen-cpp/ThriftTest.cpp gen-cpp/ThriftTest_types.cpp gen-cpp/ThriftTest_constants.cpp gen-cpp/SecondService.cpp gen-cpp/SecondService.h gen-cpp/SecondService.tcc: $(GENCPP_STAMP)
+	@:
+
+gen-cpp/Service.cpp: $(GENCPP_STAMP)
+	@:
+
+gen-cpp/SpecificNameTest_types.cpp gen-cpp/EchoService.cpp: $(GENCPP_STAMP)
+	@:
 
 # Generate ThriftTest with forward_setter option
 gen-cpp-forward/ThriftTest_types.cpp gen-cpp-forward/ThriftTest_types.h gen-cpp-forward/ThriftTest_types.tcc gen-cpp-forward/ThriftTest_constants.cpp: $(top_srcdir)/test/ThriftTest.thrift $(THRIFT)
@@ -240,12 +262,6 @@ gen-cpp-templatestreamop/ThriftTest_types.cpp gen-cpp-templatestreamop/ThriftTes
 gen-cpp-private-templatestreamop/ThriftTest_types.cpp gen-cpp-private-templatestreamop/ThriftTest_types.h gen-cpp-private-templatestreamop/ThriftTest_types.tcc gen-cpp-private-templatestreamop/ThriftTest_constants.cpp: $(top_srcdir)/test/ThriftTest.thrift $(THRIFT)
 	$(MKDIR_P) gen-cpp-private-templatestreamop
 	$(THRIFT) --gen cpp:private_optional,template_streamop -out gen-cpp-private-templatestreamop $<
-
-gen-cpp/Service.cpp: $(top_srcdir)/test/StressTest.thrift $(THRIFT)
-	$(THRIFT) --gen cpp $<
-
-gen-cpp/SpecificNameTest_types.cpp gen-cpp/EchoService.cpp: $(top_srcdir)/test/SpecificName.thrift $(THRIFT)
-	$(THRIFT) --gen cpp $<
 
 AM_CPPFLAGS = $(BOOST_CPPFLAGS) $(LIBEVENT_CPPFLAGS) -I$(top_srcdir)/lib/cpp/src -Igen-cpp -I.
 AM_CXXFLAGS = -Wall -Wextra -pedantic -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
