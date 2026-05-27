@@ -108,7 +108,7 @@ thrift_SOURCES += src/thrift/generate/t_c_glib_generator.cc \
                   src/thrift/generate/go_validator_generator.h
 
 thrift_CPPFLAGS = -I$(srcdir)/src
-thrift_CXXFLAGS = -Wall -Wextra -pedantic -Werror
+thrift_CXXFLAGS = -Wall -Wextra -pedantic -Werror -Wno-stringop-overread -Wno-stringop-overflow
 thrift_LDADD = @LEXLIB@ src/thrift/libparse.a
 
 WINDOWS_DIST = \

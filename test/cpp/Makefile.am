@@ -221,21 +221,16 @@ GENCPP_STAMP = gen-cpp/.stamp
 
 $(GENCPP_STAMP): $(top_srcdir)/test/ThriftTest.thrift \
 		$(top_srcdir)/test/StressTest.thrift \
-		$(top_srcdir)/test/SpecificName.thrift \
 		$(THRIFT)
 	$(MKDIR_P) gen-cpp
 	$(THRIFT) --gen cpp:templates,cob_style -r $(top_srcdir)/test/ThriftTest.thrift
 	$(THRIFT) --gen cpp $(top_srcdir)/test/StressTest.thrift
-	$(THRIFT) --gen cpp $(top_srcdir)/test/SpecificName.thrift
 	@touch $@
 
 gen-cpp/ThriftTest.cpp gen-cpp/ThriftTest_types.cpp gen-cpp/ThriftTest_constants.cpp gen-cpp/SecondService.cpp gen-cpp/SecondService.h gen-cpp/SecondService.tcc: $(GENCPP_STAMP)
 	@:
 
 gen-cpp/Service.cpp: $(GENCPP_STAMP)
-	@:
-
-gen-cpp/SpecificNameTest_types.cpp gen-cpp/EchoService.cpp: $(GENCPP_STAMP)
 	@:
 
 # Generate ThriftTest with forward_setter option
